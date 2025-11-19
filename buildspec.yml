@@ -5,7 +5,7 @@
           - echo "Getting last succeeded pipeline execution..."
           - |
             LAST_SUCCESS_EXECUTION_ID=$(aws codepipeline list-pipeline-executions \
-              --pipeline-name MyPipeline \
+              --pipeline-name Pipe1 \
               --filter "status=Succeeded" \
               --max-items 1 \
               --query "pipelineExecutionSummaries[0].pipelineExecutionId" \
@@ -19,7 +19,7 @@
               
               # Get the commit ID from the last succeeded execution
               LAST_SUCCESS_COMMIT_ID=$(aws codepipeline get-pipeline-execution \
-                --pipeline-name MyPipeline \
+                --pipeline-name Pipe1 \
                 --pipeline-execution-id "$LAST_SUCCESS_EXECUTION_ID" \
                 --query "pipelineExecution.artifactRevisions[0].revisionId" \
                 --output text)
