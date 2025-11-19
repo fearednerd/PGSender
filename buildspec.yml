@@ -1,11 +1,5 @@
     version: 0.2
     phases:
-      pre_build:
-        commands:
-          - echo "Setting up git configuration..."
-          - git config --global user.email "codebuild@example.com"
-          - git config --global user.name "CodeBuild"
-          
       build:
         commands:
           - echo "Getting last succeeded pipeline execution..."
@@ -80,15 +74,6 @@
             fi
           
           - echo "Git diff analysis completed"
-
-      post_build:
-        commands:
-          - echo "Build completed"
-          - |
-            if [ -n "$LAST_SUCCESS_COMMIT_ID" ]; then
-              echo "Last successful deployment commit $LAST_SUCCESS_COMMIT_ID"
-              echo "Current commit $CURRENT_COMMIT_ID"
-            fi
 
     artifacts:
       files:
