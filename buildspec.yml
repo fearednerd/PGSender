@@ -1,10 +1,3 @@
-
-
-  aws codepipeline list-pipeline-executions --pipeline-name OnlyPipeline --query "pipelineExecutionSummaries[?status=='Succeeded'] | [0].pipelineExecutionId" --output text
-
-    aws codepipeline get-pipeline-execution --pipeline-name Pipe1 --pipeline-execution-id 827ac3dd-66a1-4e86-8a3e-a80039067e4d --query "pipelineExecution.artifactRevisions[0].revisionId" --output text
-
-
     version: 0.2
     phases:
       pre_build:
