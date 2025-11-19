@@ -1,7 +1,20 @@
-    version  0.2
-    phases          
-      build 
-        commands 
+
+
+  aws codepipeline list-pipeline-executions --pipeline-name OnlyPipeline --query "pipelineExecutionSummaries[?status=='Succeeded'] | [0].pipelineExecutionId" --output text
+
+    aws codepipeline get-pipeline-execution --pipeline-name Pipe1 --pipeline-execution-id 827ac3dd-66a1-4e86-8a3e-a80039067e4d --query "pipelineExecution.artifactRevisions[0].revisionId" --output text
+
+
+    version: 0.2
+    phases:
+      pre_build:
+        commands:
+          - echo "Setting up git configuration..."
+          - git config --global user.email "codebuild@example.com"
+          - git config --global user.name "CodeBuild"
+          
+      build:
+        commands:
           - echo "Getting last succeeded pipeline execution..."
           - |
             LAST_SUCCESS_EXECUTION_ID=$(aws codepipeline list-pipeline-executions \
@@ -24,11 +37,11 @@
                 --query "pipelineExecution.artifactRevisions[0].revisionId" \
                 --output text)
               
-              echo "Last succeeded commit ID  $LAST_SUCCESS_COMMIT_ID"
+              echo "Last succeeded commit ID $LAST_SUCCESS_COMMIT_ID"
               
               # Get current commit ID for comparison
               CURRENT_COMMIT_ID=$(git rev-parse HEAD)
-              echo "Current commit ID  $CURRENT_COMMIT_ID"
+              echo "Current commit ID $CURRENT_COMMIT_ID"
               
               # Export for use in other phases
               export LAST_SUCCESS_COMMIT_ID="$LAST_SUCCESS_COMMIT_ID"
@@ -38,11 +51,11 @@
               echo "=== Git diff from last succeeded deployment to current commit ==="
               
               if [ "$LAST_SUCCESS_COMMIT_ID" = "$CURRENT_COMMIT_ID" ]; then
-                echo "No changes  Current commit is the same as last succeeded deployment"
+                echo "No changes Current commit is the same as last succeeded deployment"
               else
-                echo "Changes detected between commits "
-                echo "From  $LAST_SUCCESS_COMMIT_ID"
-                echo "To  $CURRENT_COMMIT_ID"
+                echo "Changes detected between commits"
+                echo "From $LAST_SUCCESS_COMMIT_ID"
+                echo "To $CURRENT_COMMIT_ID"
                 echo ""
                 
                 # Show summary of changes
@@ -69,21 +82,22 @@
               echo "No successful pipeline execution found"
               echo "This might be the first deployment - showing current commit info"
               CURRENT_COMMIT_ID=$(git rev-parse HEAD)
-              echo "Current commit ID  $CURRENT_COMMIT_ID"
+              echo "Current commit ID $CURRENT_COMMIT_ID"
               git log --oneline -5
             fi
           
           - echo "Git diff analysis completed"
 
-      post_build 
-        commands 
+      post_build:
+        commands:
           - echo "Build completed"
           - |
             if [ -n "$LAST_SUCCESS_COMMIT_ID" ]; then
-              echo "Last successful deployment commit  $LAST_SUCCESS_COMMIT_ID"
-              echo "Current commit  $CURRENT_COMMIT_ID"
+              echo "Last successful deployment commit $LAST_SUCCESS_COMMIT_ID"
+              echo "Current commit $CURRENT_COMMIT_ID"
             fi
 
-    artifacts 
-      files 
+    artifacts:
+      files:
         - '**/*'
+
