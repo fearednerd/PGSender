@@ -16,7 +16,7 @@
             if [ "$LAST_SUCCESS_EXECUTION_ID" != "None" ] && [ -n "$LAST_SUCCESS_EXECUTION_ID" ]; then
               echo "Getting commit ID from last succeeded execution..."
               
-              # Get the commit ID from the last succeeded execution
+              # Get the commit ID from the last succeeded execution2
               LAST_SUCCESS_COMMIT_ID=$(aws codepipeline get-pipeline-execution \
                 --pipeline-name Pipe1 \
                 --pipeline-execution-id "$LAST_SUCCESS_EXECUTION_ID" \
