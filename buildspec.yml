@@ -2,7 +2,7 @@
     phases:
       build:
         commands:
-          - echo "Getting last succeeded pipeline execution..."
+          - echo "Getting last succeeded pipeline executionaaa..."
           - |
             LAST_SUCCESS_EXECUTION_ID=$(aws codepipeline list-pipeline-executions \
               --pipeline-name Pipe1 \
