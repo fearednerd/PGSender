@@ -6,7 +6,6 @@
           - |
             LAST_SUCCESS_EXECUTION_ID=$(aws codepipeline list-pipeline-executions \
               --pipeline-name Pipe1 \
-              --max-results 1 \
               --query "pipelineExecutionSummaries[?status=='Succeeded'] | [0].pipelineExecutionId" \
               --output text)
           
