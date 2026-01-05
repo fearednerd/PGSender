@@ -1,0 +1,79 @@
+    version: 0.2
+    phases:
+      build:
+        commands:
+          - echo "Getting last succeeded pipeline executionaasd..."
+          - |
+            LAST_SUCCESS_EXECUTION_ID=$(aws codepipeline list-pipeline-executions \
+              --pipeline-name Pipe1 \
+              --query "pipelineExecutionSummaries[?status=='Succeeded'] | [0].pipelineExecutionId" \
+              --output text)
+          
+          - echo "Last succeeded execution ID $LAST_SUCCESS_EXECUTION_ID"
+          
+          - |
+            if [ "$LAST_SUCCESS_EXECUTION_ID" != "None" ] && [ -n "$LAST_SUCCESS_EXECUTION_ID" ]; then
+              echo "Getting commit ID from last succeeded execution..."
+              
+              # Get the commit ID from the last succeeded execution2
+              LAST_SUCCESS_COMMIT_ID=$(aws codepipeline get-pipeline-execution \
+                --pipeline-name Pipe1 \
+                --pipeline-execution-id "$LAST_SUCCESS_EXECUTION_ID" \
+                --query "pipelineExecution.artifactRevisions[0].revisionId" \
+                --output text)
+              
+              echo "Last succeeded commit ID $LAST_SUCCESS_COMMIT_ID"
+              
+              # Get current commit ID for comparison
+              CURRENT_COMMIT_ID=$(git rev-parse HEAD)
+              echo "Current commit ID $CURRENT_COMMIT_ID"
+              
+              # Export for use in other phases
+              export LAST_SUCCESS_COMMIT_ID="$LAST_SUCCESS_COMMIT_ID"
+              export CURRENT_COMMIT_ID="$CURRENT_COMMIT_ID"
+              
+              # Perform git diff between last successful deployment and current commit
+              echo "=== Git diff from last succeeded deployment to current commit ==="
+              
+              if [ "$LAST_SUCCESS_COMMIT_ID" = "$CURRENT_COMMIT_ID" ]; then
+                echo "No changes Current commit is the same as last succeeded deployment"
+              else
+                echo "Changes detected between commits"
+                echo "From $LAST_SUCCESS_COMMIT_ID"
+                echo "To $CURRENT_COMMIT_ID"
+                echo ""
+                
+                # Show summary of changes
+                echo "=== Summary of changes ==="
+                git diff --stat "$LAST_SUCCESS_COMMIT_ID" "$CURRENT_COMMIT_ID" || echo "Could not generate diff stats"
+                echo ""
+                
+                # Show list of changed files
+                echo "=== Changed files ==="
+                git diff --name-only "$LAST_SUCCESS_COMMIT_ID" "$CURRENT_COMMIT_ID" || echo "Could not list changed files"
+                echo ""
+                
+                # Show detailed diff (optional - can be very long)
+                echo "=== Detailed changes (first 50 lines) ==="
+                git diff "$LAST_SUCCESS_COMMIT_ID" "$CURRENT_COMMIT_ID" | head -50 || echo "Could not generate detailed diff"
+                echo ""
+                
+                # Get commit messages between the two commits
+                echo "=== Commit messages since last successful deployment ==="
+                git log --oneline "$LAST_SUCCESS_COMMIT_ID".."$CURRENT_COMMIT_ID" || echo "Could not get commit log"
+              fi
+              
+            else
+              echo "No successful pipeline execution found"
+              echo "This might be the first deployment - showing current commit info"
+              CURRENT_COMMIT_ID=$(git rev-parse HEAD)
+              echo "Current commit ID $CURRENT_COMMIT_ID"
+              git log --oneline -5
+            fi
+          
+          - echo "Git diff analysis completed"
+
+    artifacts:
+      files:
+        - '**/*'
+
